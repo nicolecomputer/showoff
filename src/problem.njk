@@ -1,0 +1,27 @@
+---
+pagination:
+  data: collections.problems
+  size: 1
+  alias: problem
+permalink: "{{ problem.data.page.url }}"
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ problem.data.title }}</title>
+</head>
+<body>
+    <h1>{{ problem.data.title }}</h1>
+    <p>Difficulty: {{ problem.data.difficulty }}</p>
+    {% if problem.data.topics %}
+    <p>Topics:</p>
+    <ul>
+    {% for topic in problem.data.topics %}
+        <li>{{ topic }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>
