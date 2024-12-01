@@ -40,7 +40,16 @@ module.exports = function (eleventyConfig) {
     },
   });
 
-  // Updated Problems collection to include source files
+  const showoffPath = path.join(__dirname, "problems", "showoff.yml");
+  let siteConfig = {};
+  try {
+    const showoffContent = fs.readFileSync(showoffPath, "utf8");
+    siteConfig = yaml.load(showoffContent);
+  } catch (err) {
+    console.error("Error reading showoff.yml:", err);
+    siteConfig = { title: "Problems" }; // Default title if file is missing
+  }
+
   eleventyConfig.addCollection("problems", function (collectionApi) {
     const problemsDir = path.join(__dirname, "problems");
     const problems = [];
@@ -89,6 +98,7 @@ module.exports = function (eleventyConfig) {
               ...yamlData,
               description: description,
               sourceFiles: sourceFiles,
+              siteConfig: siteConfig,
               page: {
                 fileSlug: dirName,
                 url: `/${dirName}/`,
@@ -103,6 +113,8 @@ module.exports = function (eleventyConfig) {
 
     return problems;
   });
+
+  eleventyConfig.addGlobalData("siteConfig", siteConfig);
 
   return {
     dir: {
