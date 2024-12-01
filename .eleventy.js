@@ -6,6 +6,7 @@ const postcss = require("postcss");
 const tailwindcss = require("tailwindcss");
 const autoprefixer = require("autoprefixer");
 const markdownIt = require("markdown-it");
+const matter = require("gray-matter");
 
 module.exports = function (eleventyConfig) {
   // Previous configuration remains the same
@@ -46,7 +47,7 @@ module.exports = function (eleventyConfig) {
     const showoffContent = fs.readFileSync(showoffPath, "utf8");
     siteConfig = yaml.load(showoffContent);
   } catch (err) {
-    console.error("Error reading showoff.yml:", err);
+    console; //.error("Error reading showoff.yml:", err);
     siteConfig = { title: "Problems" }; // Default title if file is missing
   }
 
@@ -58,25 +59,35 @@ module.exports = function (eleventyConfig) {
       const problemDir = path.join(problemsDir, dirName);
 
       if (fs.statSync(problemDir).isDirectory()) {
-        const yamlPath = path.join(problemDir, "problem.yml");
-        const mdPath = path.join(problemDir, "problem.md");
+        const descriptionPath = path.join(problemDir, "problem.md");
         const inputPath = path.join(problemDir, "input.txt");
         const notesPath = path.join(problemDir, "notes.md");
 
         try {
-          // Read YAML data
-          const yamlContents = fs.readFileSync(yamlPath, "utf8");
-          const yamlData = yaml.load(yamlContents);
+          let problem = {
+            title: dirName,
+            shortDescription: "",
+          };
 
           // Read Markdown content
-          let description = { enabled: false, content: "" };
+          let description = { enabled: false, content: "", metadata: {} };
           try {
+            const fileContent = fs.readFileSync(descriptionPath, "utf8");
+            const { data, content } = matter(fileContent);
             description = {
               enabled: true,
-              content: fs.readFileSync(mdPath, "utf8"),
+              content: content,
             };
+
+            console.error(content);
+            console.error(data);
+
+            if (data.title) {
+              problem.title = data.title;
+            }
           } catch (mdErr) {
-            console.error(`Error reading ${mdPath}:`, mdErr);
+            // console.log(mdErr);
+            //console.error(`Error reading ${descriptionPath}:`, mdErr);
           }
 
           let notes = { enabled: false, content: "" };
@@ -86,7 +97,7 @@ module.exports = function (eleventyConfig) {
               content: fs.readFileSync(notesPath, "utf8"),
             };
           } catch (mdErr) {
-            console.error(`Error reading ${mdPath}:`, mdErr);
+            //console.error(`Error reading ${notesPath}:`, mdErr);
           }
 
           // Read input
@@ -97,7 +108,7 @@ module.exports = function (eleventyConfig) {
               content: fs.readFileSync(inputPath, "utf8"),
             };
           } catch (mdErr) {
-            console.error(`Error reading ${inputPath}:`, mdErr);
+            //console.error(`Error reading ${inputPath}:`, mdErr);
           }
 
           // Read all source code files
@@ -113,14 +124,14 @@ module.exports = function (eleventyConfig) {
                   language: path.extname(fileName).slice(1), // removes the dot
                 });
               } catch (err) {
-                console.error(`Error reading ${filePath}:`, err);
+                //console.error(`Error reading ${filePath}:`, err);
               }
             }
           });
 
           problems.push({
             data: {
-              ...yamlData,
+              ...problem,
               tabs: {
                 input: input,
                 description: description,
@@ -135,7 +146,7 @@ module.exports = function (eleventyConfig) {
             },
           });
         } catch (err) {
-          console.error(`Error processing ${yamlPath}:`, err);
+          //console.error(`Error processing ${yamlPath}:`, err);
         }
       }
     });

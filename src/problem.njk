@@ -43,7 +43,10 @@ permalink: "{{ problem.data.page.url }}"
     <div class="max-w-3xl px-6 mx-auto">
       <header class="py-6">
         <h1 class="text-3xl font-bold">{{problem.data.title}}</h1>
-        <p class="mt-4 text-gray-600">{{problem.data.description}}</p>
+        {%- if problem.data.shortDescription and
+        problem.data.shortDescription.length > 0 -%}
+        <p class="mt-4 text-gray-600">{{problem.data.shortDescription}}</p>
+        {%- endif -%}
       </header>
 
       <div class="flex border-b border-gray-200">
