@@ -36,7 +36,7 @@ permalink: "{{ problem.data.page.url }}"
             </p>
 
             {% if problem.data.topics %}
-            <div class="mt-4">
+            <div class="mb-6">
                 <p class="font-semibold mb-2">Topics:</p>
                 <ul class="flex flex-wrap gap-2">
                 {% for topic in problem.data.topics %}
@@ -45,6 +45,10 @@ permalink: "{{ problem.data.page.url }}"
                 </ul>
             </div>
             {% endif %}
+
+            <div class="prose prose-blue max-w-none">
+                {{ problem.data.description | markdown | safe }}
+            </div>
         </div>
     </div>
 </body>

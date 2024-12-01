@@ -4,34 +4,42 @@ const path = require("path");
 const postcss = require("postcss");
 const tailwindcss = require("tailwindcss");
 const autoprefixer = require("autoprefixer");
+const markdownIt = require("markdown-it");
 
 module.exports = function (eleventyConfig) {
-  // Process CSS
+  // Set up markdown-it
+  let markdownLibrary = markdownIt({
+    html: true,
+    breaks: true,
+    linkify: true,
+  });
+
+  // Add the markdown filter
+  eleventyConfig.addFilter("markdown", function (content) {
+    return markdownLibrary.render(content);
+  });
+
+  // CSS Processing
   eleventyConfig.addTemplateFormats("css");
 
   eleventyConfig.addExtension("css", {
     outputFileExtension: "css",
-    compile: async function (content, path) {
-      if (path.includes("style.css")) {
-        return async () => {
-          let output = await postcss([tailwindcss, autoprefixer]).process(
-            content,
-            { from: path }
-          );
-          return output.css;
-        };
-      }
-      return async () => content;
+    compile: async function (inputContent) {
+      // Process CSS with PostCSS and Tailwind
+      let output = await postcss([
+        tailwindcss(require("./tailwind.config.js")),
+        autoprefixer(),
+      ]).process(inputContent);
+
+      return async () => {
+        return output.css;
+      };
     },
   });
 
   // Watch CSS files for changes
   eleventyConfig.addWatchTarget("./src/css/");
 
-  // Pass through CSS files
-  eleventyConfig.addPassthroughCopy("src/css");
-
-  // Problems collection (keeping your existing code)
   eleventyConfig.addCollection("problems", function (collectionApi) {
     const problemsDir = path.join(__dirname, "problems");
     const problems = [];
@@ -41,14 +49,24 @@ module.exports = function (eleventyConfig) {
 
       if (fs.statSync(problemDir).isDirectory()) {
         const yamlPath = path.join(problemDir, "problem.yaml");
+        const mdPath = path.join(problemDir, "description.md");
 
         try {
-          const fileContents = fs.readFileSync(yamlPath, "utf8");
-          const data = yaml.load(fileContents);
+          const yamlContents = fs.readFileSync(yamlPath, "utf8");
+          const yamlData = yaml.load(yamlContents);
+
+          let description = "";
+          try {
+            description = fs.readFileSync(mdPath, "utf8");
+          } catch (mdErr) {
+            console.error(`Error reading ${mdPath}:`, mdErr);
+            description = "Description not available.";
+          }
 
           problems.push({
             data: {
-              ...data,
+              ...yamlData,
+              description: description,
               page: {
                 fileSlug: dirName,
                 url: `/${dirName}/`,
@@ -56,7 +74,7 @@ module.exports = function (eleventyConfig) {
             },
           });
         } catch (err) {
-          console.error(`Error reading ${yamlPath}:`, err);
+          console.error(`Error processing ${yamlPath}:`, err);
         }
       }
     });
