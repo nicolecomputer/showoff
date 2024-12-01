@@ -69,29 +69,35 @@ module.exports = function (eleventyConfig) {
           const yamlData = yaml.load(yamlContents);
 
           // Read Markdown content
-          let description = "";
+          let description = { enabled: false, content: "" };
           try {
-            description = fs.readFileSync(mdPath, "utf8");
+            description = {
+              enabled: true,
+              content: fs.readFileSync(mdPath, "utf8"),
+            };
           } catch (mdErr) {
             console.error(`Error reading ${mdPath}:`, mdErr);
-            description = "Description not available.";
           }
 
-          let notes = "";
+          let notes = { enabled: false, content: "" };
           try {
-            notes = fs.readFileSync(notesPath, "utf8");
+            notes = {
+              enabled: true,
+              content: fs.readFileSync(notesPath, "utf8"),
+            };
           } catch (mdErr) {
             console.error(`Error reading ${mdPath}:`, mdErr);
-            notes = "notes not available.";
           }
 
           // Read input
-          let input = "";
+          let input = { enabled: false, content: "" };
           try {
-            input = fs.readFileSync(inputPath, "utf8");
+            input = {
+              enabled: true,
+              content: fs.readFileSync(inputPath, "utf8"),
+            };
           } catch (mdErr) {
             console.error(`Error reading ${inputPath}:`, mdErr);
-            input = "Input not available.";
           }
 
           // Read all source code files

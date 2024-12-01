@@ -47,37 +47,46 @@ permalink: "{{ problem.data.page.url }}"
       </header>
 
       <div class="flex border-b border-gray-200">
+        {% if problem.data.tabs.description.enabled %}
         <button data-tab="problem" class="tab-button tab-button-active">
           Problem
         </button>
+        {% endif %} {% if problem.data.tabs.input.enabled %}
         <button data-tab="input" class="tab-button tab-button-inactive">
           Input
         </button>
+        {% endif %}
         <button data-tab="code" class="tab-button tab-button-inactive">
           Code
         </button>
+        {% if problem.data.tabs.notes.enabled %}
         <button data-tab="notes" class="tab-button tab-button-inactive">
           Notes
         </button>
+        {% endif %}
       </div>
 
       <!-- Problem Tab-->
+      {% if problem.data.tabs.description.enabled %}
       <div data-tab-content="problem" class="py-2">
         <div class="prose-block">
           <h2 class="mb-4 text-xl font-semibold">Description</h2>
-          {{ problem.data.tabs.description | markdown | safe }}
+          {{ problem.data.tabs.description.content | markdown | safe }}
         </div>
       </div>
+      {% endif %}
 
       <!-- Input Tab -->
+      {% if problem.data.tabs.input.enabled %}
       <div data-tab-content="input" class="py-2">
         <div class="code-block">
           <p class="code-block-header">input.txt</p>
           <div class="code-block-content">
-            <pre><code>{{ problem.data.tabs.input }}</code></pre>
+            <pre><code>{{ problem.data.tabs.input.content }}</code></pre>
           </div>
         </div>
       </div>
+      {% endif %}
 
       <!-- Code Tab -->
       <div data-tab-content="code" class="py-2">
@@ -92,12 +101,14 @@ permalink: "{{ problem.data.page.url }}"
       </div>
 
       <!-- Notes Tab -->
+      {% if problem.data.tabs.notes.enabled %}
       <div data-tab-content="notes" class="py-2">
         <div class="prose-block">
           <h2 class="mb-4 text-xl font-semibold">Notes</h2>
-          {{ problem.data.tabs.notes | markdown | safe }}
+          {{ problem.data.tabs.notes.content | markdown | safe }}
         </div>
       </div>
+      {% endif %}
     </div>
 
     <script>
