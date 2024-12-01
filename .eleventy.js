@@ -58,8 +58,10 @@ module.exports = function (eleventyConfig) {
       const problemDir = path.join(problemsDir, dirName);
 
       if (fs.statSync(problemDir).isDirectory()) {
-        const yamlPath = path.join(problemDir, "problem.yaml");
-        const mdPath = path.join(problemDir, "description.md");
+        const yamlPath = path.join(problemDir, "problem.yml");
+        const mdPath = path.join(problemDir, "problem.md");
+        const inputPath = path.join(problemDir, "input.txt");
+        const notesPath = path.join(problemDir, "notes.md");
 
         try {
           // Read YAML data
@@ -73,6 +75,23 @@ module.exports = function (eleventyConfig) {
           } catch (mdErr) {
             console.error(`Error reading ${mdPath}:`, mdErr);
             description = "Description not available.";
+          }
+
+          let notes = "";
+          try {
+            notes = fs.readFileSync(notesPath, "utf8");
+          } catch (mdErr) {
+            console.error(`Error reading ${mdPath}:`, mdErr);
+            notes = "notes not available.";
+          }
+
+          // Read input
+          let input = "";
+          try {
+            input = fs.readFileSync(inputPath, "utf8");
+          } catch (mdErr) {
+            console.error(`Error reading ${inputPath}:`, mdErr);
+            input = "Input not available.";
           }
 
           // Read all source code files
@@ -96,8 +115,12 @@ module.exports = function (eleventyConfig) {
           problems.push({
             data: {
               ...yamlData,
-              description: description,
-              sourceFiles: sourceFiles,
+              tabs: {
+                input: input,
+                description: description,
+                sourceFiles: sourceFiles,
+                notes: notes,
+              },
               siteConfig: siteConfig,
               page: {
                 fileSlug: dirName,

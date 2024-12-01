@@ -5,70 +5,128 @@ pagination:
   alias: problem
 permalink: "{{ problem.data.page.url }}"
 ---
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ problem.data.title }}</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css">
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <a href="/" class="text-blue-600 hover:text-blue-800 mb-4 inline-block">&larr; Back to Problems</a>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css"
+    />
 
-        <h1 class="text-4xl font-bold mb-4 text-gray-900">{{ problem.data.title }}</h1>
+    <style>
+      .code-block pre {
+        margin: 0 !important;
+      }
+    </style>
+  </head>
 
-        <div class="bg-white shadow rounded-lg p-6 mb-8">
-            <p class="mb-4">
-                <span class="font-semibold">Difficulty:</span>
-                <span class="ml-2 px-2 py-1 text-sm rounded-full
-                    {% if problem.data.difficulty == 'Easy' %}
-                        bg-green-100 text-green-800
-                    {% elif problem.data.difficulty == 'Medium' %}
-                        bg-yellow-100 text-yellow-800
-                    {% else %}
-                        bg-red-100 text-red-800
-                    {% endif %}
-                ">
-                    {{ problem.data.difficulty }}
-                </span>
-            </p>
-
-            {% if problem.data.topics %}
-            <div class="mb-6">
-                <p class="font-semibold mb-2">Topics:</p>
-                <ul class="flex flex-wrap gap-2">
-                {% for topic in problem.data.topics %}
-                    <li class="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700">{{ topic }}</li>
-                {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-
-            <div class="prose prose-blue max-w-none mb-8">
-                {{ problem.data.description | markdown | safe }}
-            </div>
-
-            {% if problem.data.sourceFiles %}
-            <div class="mt-8">
-                <h2 class="text-2xl font-bold mb-4">Source Code</h2>
-                {% for file in problem.data.sourceFiles %}
-                <div class="mb-6">
-                    <div class="code-header">{{ file.name }}</div>
-                    <pre class="code-block"><code class="language-{{ file.language }}">{{ file.content }}</code></pre>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
+  <body class="min-h-screen bg-gray-50">
+    <div class="bg-amber-400 text-white py-3 px-8">
+      <h1 class="text-3xl font-bold">{{siteConfig.title}}</h1>
     </div>
+
+    <div class="max-w-3xl mx-auto px-6">
+      <header class="py-6">
+        <h1 class="text-3xl font-bold">{{problem.data.title}}</h1>
+        <p class="mt-4 text-gray-600">{{problem.data.description}}</p>
+      </header>
+
+      <div class="flex border-b border-gray-200">
+        <button data-tab="problem" class="tab-button tab-button-active">
+          Problem
+        </button>
+        <button data-tab="input" class="tab-button tab-button-inactive">
+          Input
+        </button>
+        <button data-tab="code" class="tab-button tab-button-inactive">
+          Code
+        </button>
+        <button data-tab="notes" class="tab-button tab-button-inactive">
+          Notes
+        </button>
+      </div>
+
+      <!-- Problem Tab-->
+      <div data-tab-content="problem" class="py-2">
+        <div class="prose-block">
+          <h2 class="text-xl font-semibold mb-4">Description</h2>
+          {{ problem.data.tabs.description | markdown | safe }}
+        </div>
+      </div>
+
+      <!-- Input Tab -->
+      <div data-tab-content="input" class="py-2">
+        <div class="code-block">
+          <p class="code-block-header">input.txt</p>
+          <div class="code-block-content">
+            <pre><code>{{ problem.data.tabs.input }}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Tab -->
+      <div data-tab-content="code" class="py-2">
+        {% for file in problem.data.tabs.sourceFiles %}
+        <div class="code-block">
+          <p class="code-block-header">{{ file.name }}</p>
+          <div class="code-block-content">
+            <pre><code class="language-{{ file.language }}">{{ file.content }}</code></pre>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Notes Tab -->
+      <div data-tab-content="notes" class="py-2">
+        <div class="prose-block">
+          <h2 class="text-xl font-semibold mb-4">Notes</h2>
+          {{ problem.data.tabs.notes | markdown | safe }}
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showTab(tabId) {
+        // Remove active states from all tabs
+        document.querySelectorAll("[data-tab]").forEach((t) => {
+          t.classList.remove("tab-button-active")
+          t.classList.add("tab-button-inactive")
+        })
+
+        // Hide all content
+        document.querySelectorAll("[data-tab-content]").forEach((content) => {
+          content.classList.add("hidden")
+        })
+
+        // Show selected content and activate tab
+        const content = document.querySelector(`[data-tab-content="${tabId}"]`)
+        const tab = document.querySelector(`[data-tab="${tabId}"]`)
+        content.classList.remove("hidden")
+        tab.classList.remove("tab-button-inactive")
+        tab.classList.add("tab-button-active")
+      }
+
+      // Add click handlers
+      document.querySelectorAll("[data-tab]").forEach((tab) => {
+        tab.addEventListener("click", () => showTab(tab.dataset.tab))
+      })
+
+      // Show initial tab
+      showTab("code")
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
-</body>
+  </body>
 </html>
