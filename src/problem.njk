@@ -12,6 +12,8 @@ permalink: "{{ problem.data.page.url }}"
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ problem.data.title }}</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4 py-8">
@@ -19,7 +21,7 @@ permalink: "{{ problem.data.page.url }}"
 
         <h1 class="text-4xl font-bold mb-4 text-gray-900">{{ problem.data.title }}</h1>
 
-        <div class="bg-white shadow rounded-lg p-6">
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
             <p class="mb-4">
                 <span class="font-semibold">Difficulty:</span>
                 <span class="ml-2 px-2 py-1 text-sm rounded-full
@@ -46,10 +48,27 @@ permalink: "{{ problem.data.page.url }}"
             </div>
             {% endif %}
 
-            <div class="prose prose-blue max-w-none">
+            <div class="prose prose-blue max-w-none mb-8">
                 {{ problem.data.description | markdown | safe }}
             </div>
+
+            {% if problem.data.sourceFiles %}
+            <div class="mt-8">
+                <h2 class="text-2xl font-bold mb-4">Source Code</h2>
+                {% for file in problem.data.sourceFiles %}
+                <div class="mb-6">
+                    <div class="code-header">{{ file.name }}</div>
+                    <pre class="code-block"><code class="language-{{ file.language }}">{{ file.content }}</code></pre>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
 </body>
 </html>

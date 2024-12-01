@@ -1,3 +1,4 @@
+// .eleventy.js
 const yaml = require("js-yaml");
 const fs = require("fs");
 const path = require("path");
@@ -7,17 +8,20 @@ const autoprefixer = require("autoprefixer");
 const markdownIt = require("markdown-it");
 
 module.exports = function (eleventyConfig) {
-  // Set up markdown-it
+  // Previous configuration remains the same
   let markdownLibrary = markdownIt({
     html: true,
     breaks: true,
     linkify: true,
   });
 
-  // Add the markdown filter
   eleventyConfig.addFilter("markdown", function (content) {
     return markdownLibrary.render(content);
   });
+
+  // Watch directories
+  eleventyConfig.addWatchTarget("./problems/");
+  eleventyConfig.addWatchTarget("./src/css/");
 
   // CSS Processing
   eleventyConfig.addTemplateFormats("css");
@@ -25,7 +29,6 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addExtension("css", {
     outputFileExtension: "css",
     compile: async function (inputContent) {
-      // Process CSS with PostCSS and Tailwind
       let output = await postcss([
         tailwindcss(require("./tailwind.config.js")),
         autoprefixer(),
@@ -37,9 +40,7 @@ module.exports = function (eleventyConfig) {
     },
   });
 
-  // Watch CSS files for changes
-  eleventyConfig.addWatchTarget("./src/css/");
-
+  // Updated Problems collection to include source files
   eleventyConfig.addCollection("problems", function (collectionApi) {
     const problemsDir = path.join(__dirname, "problems");
     const problems = [];
@@ -52,9 +53,11 @@ module.exports = function (eleventyConfig) {
         const mdPath = path.join(problemDir, "description.md");
 
         try {
+          // Read YAML data
           const yamlContents = fs.readFileSync(yamlPath, "utf8");
           const yamlData = yaml.load(yamlContents);
 
+          // Read Markdown content
           let description = "";
           try {
             description = fs.readFileSync(mdPath, "utf8");
@@ -63,10 +66,29 @@ module.exports = function (eleventyConfig) {
             description = "Description not available.";
           }
 
+          // Read all source code files
+          const sourceFiles = [];
+          fs.readdirSync(problemDir).forEach((fileName) => {
+            if (fileName.endsWith(".ts") || fileName.endsWith(".js")) {
+              const filePath = path.join(problemDir, fileName);
+              try {
+                const sourceCode = fs.readFileSync(filePath, "utf8");
+                sourceFiles.push({
+                  name: fileName,
+                  content: sourceCode,
+                  language: path.extname(fileName).slice(1), // removes the dot
+                });
+              } catch (err) {
+                console.error(`Error reading ${filePath}:`, err);
+              }
+            }
+          });
+
           problems.push({
             data: {
               ...yamlData,
               description: description,
+              sourceFiles: sourceFiles,
               page: {
                 fileSlug: dirName,
                 url: `/${dirName}/`,

@@ -1,3 +1,17 @@
+/* src/css/style.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Prism.js theme customizations */
+pre[class*="language-"] {
+  @apply my-4 rounded-lg !important;
+}
+
+.code-header {
+  @apply bg-gray-800 text-gray-200 px-4 py-2 rounded-t-lg font-mono text-sm;
+}
+
+.code-block {
+  @apply -mt-4; /* Connect header with code block */
+}
