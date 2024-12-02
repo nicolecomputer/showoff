@@ -78,10 +78,6 @@ module.exports = function (eleventyConfig) {
               enabled: true,
               content: content,
             };
-
-            console.error(content);
-            console.error(data);
-
             if (data.title) {
               problem.title = data.title;
             }
